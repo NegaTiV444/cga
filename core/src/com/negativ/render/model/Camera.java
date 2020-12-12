@@ -10,4 +10,5 @@ public interface Camera {
     void rotate(MyVector3 rotation);
     void move(MyVector3 movement);
     void restoreDefault();
+    MyVector3 getPosition();
 }

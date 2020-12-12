@@ -44,6 +44,11 @@ public class CameraImpl2 implements Camera{
     }
 
     @Override
+    public MyVector3 getPosition() {
+        return position;
+    }
+
+    @Override
     public void rotate(MyVector3 rotation) {
         this.rotation = this.rotation.add(rotation);
     }

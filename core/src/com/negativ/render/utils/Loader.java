@@ -48,16 +48,18 @@ public class Loader {
                             double w = components.length == VALUES_IN_VERTEX_LINE_COUNT + 2 ? Double.parseDouble(components[4]) : 1;
                             vertexes.add(new MyVector4(Double.parseDouble(components[1]), Double.parseDouble(components[2]), Double.parseDouble(components[3]), w));
                         } else {
-                            System.out.println("LIne '" + line + "' was skipped");
+                            System.out.println("Line '" + line + "' was skipped");
                         }
-                    } else if (components[0].equals(POLYGON_MARKER)) {
+                    } else if (components[0].equals(POLYGON_MARKER)) {                 //Format - v/vt/vn
                         if (components.length > MIN_VALUES_IN_POLYGON_LINE_COUNT) {
                             List<Integer> polygonVertexesId = new ArrayList<>();
+                            List<Integer> polygonNormalsId = new ArrayList<>();
                             for (int i = 1; i < components.length; i++) {
                                 String[] idArray = components[i].split(POLYGON_VERTEXES_SPLITTER);
                                 polygonVertexesId.add(Integer.parseInt(idArray[0]));
+                                polygonNormalsId.add(Integer.parseInt(idArray[2]));
                             }
-                            polygons.add(new Polygon(polygonVertexesId));
+                            polygons.add(new Polygon(polygonVertexesId, polygonNormalsId));
                         } else {
                             System.out.println("Line '" + line + "' was skipped");
                         }

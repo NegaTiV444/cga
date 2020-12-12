@@ -202,4 +202,13 @@ public class MyMatrix4 {
                 m12, m13, m14, m15
         });
     }
+
+    public MyMatrix4 tuncTranslation() {
+        return new MyMatrix4(new double[]{
+                val[0], val[1], val[2], 0,
+                val[4], val[5], val[6], 0,
+                val[8], val[9], val[10], 0,
+                val[12], val[13], val[14], 1
+        });
+    }
 }

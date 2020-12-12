@@ -8,7 +8,7 @@ public class CameraImpl1 implements Camera{
 
     private final MyVector3 DEFAULT_CAMERA_POSITION = new MyVector3(0, 0, -100);
     private final MyVector3 DEFAULT_CAMERA_TARGET = new MyVector3(0, 0, 0);
-    private final MyVector3 WORLD_y = new MyVector3(0, 1, 0);
+    private final MyVector3 WORLD_Y = new MyVector3(0, 1, 0);
 
 
     private MyVector3 pos  = DEFAULT_CAMERA_POSITION;
@@ -62,6 +62,11 @@ public class CameraImpl1 implements Camera{
 
     }
 
+    @Override
+    public MyVector3 getPosition() {
+        return null;
+    }
+
     //Camera movement
 
     public void moveZ(float sign) {
@@ -105,7 +110,7 @@ public class CameraImpl1 implements Camera{
 //        z.z = (Math.sin(yaw) * Math.cos(pitch));
 //        z = z.nor();
         z  = pos.sub(target).nor();
-        x = z.crossProduct(WORLD_y).nor();
+        x = z.crossProduct(WORLD_Y).nor();
         y = x.crossProduct(z).nor();
     }
 

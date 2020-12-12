@@ -14,7 +14,7 @@ public class Main extends ApplicationAdapter {
 	private final String HEAD_OBJ_FILE_NAME = "Head.obj";
 	private final String CUBE_OBJ_FILE_NAME = "Cube.obj";
 	private final String DIABLO_OBJ_FILE_NAME = "Diablo.obj";
-	private final String TREE_OBJ_FILE_NAME = "Tree.obj";
+	private final String SHIP_OBJ_FILE_NAME = "Ship.obj";
 
 	private final int WIDTH = 1920;
 	private final int HEIGHT = 1080;
@@ -30,12 +30,11 @@ public class Main extends ApplicationAdapter {
 		world = new World(WIDTH, HEIGHT, screen);
 		world.setActiveCamera(new CameraImpl2());
 		try {
-			Model model = new Model(loader.loadModel(HEAD_OBJ_FILE_NAME), new MyVector3(1, 0, 0), "Head");
+			Model model = new Model(loader.loadModel(SHIP_OBJ_FILE_NAME), new MyVector3(0, 0, 0), "Ship");
 			world.addModel(model);
-			world.setActiveModel(model);
-			model = new Model(loader.loadModel(CUBE_OBJ_FILE_NAME), new MyVector3(1, 0, 0), "Cube");
+			model = new Model(loader.loadModel(HEAD_OBJ_FILE_NAME), new MyVector3(5, 0, 0), "Head");
 			world.addModel(model);
-			model = new Model(loader.loadModel(DIABLO_OBJ_FILE_NAME), new MyVector3(-2, 0, 3), "Diablo");
+			model = new Model(loader.loadModel(DIABLO_OBJ_FILE_NAME), new MyVector3(-5, 0, 0), "Diablo");
 			world.addModel(model);
 		} catch (FileNotFoundException e) {
 			throw new IllegalStateException(e);

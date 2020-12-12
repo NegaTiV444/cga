@@ -26,6 +26,12 @@ public class MyVector3 {
         this.z = 1f;
     }
 
+    public MyVector3(MyVector3i myVector3i) {
+        this.x = myVector3i.x;
+        this.y = myVector3i.x;
+        this.z = myVector3i.x;
+    }
+
     public double len() {
         return (double)Math.sqrt(x * x + y * y + z * z);
     }
