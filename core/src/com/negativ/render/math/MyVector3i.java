@@ -83,4 +83,12 @@ public class MyVector3i {
     public String toString() {
         return String.format("x: %4d y: %4d z: %fd", x, y, z);
     }
+
+    public int toRGB888() {
+        int r, g, b;
+        r = Math.min(x, 255);
+        g = Math.min(y, 255);
+        b = Math.min((int)z, 255);
+        return (r << 24) + (g << 16) + (b << 8);
+    }
 }

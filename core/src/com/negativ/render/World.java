@@ -37,7 +37,7 @@ public class World {
     private double MODEL_SCALE_COEFFICIENT = 1.05;
 
     private static final double Z_NEAR = 0.4f;
-    private static final double Z_FAR = 100f;
+    private static final double Z_FAR = 200f;
 
     private int activeModelId = 0;
 
@@ -117,8 +117,7 @@ public class World {
                             normals.get(p.getNormalId().get(0) - 1),
                             normals.get(p.getNormalId().get(1) - 1),
                             normals.get(p.getNormalId().get(2) - 1),
-                            light1,
-                            activeCamera.getPosition()
+                            light1
                     );
                 }
             });

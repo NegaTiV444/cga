@@ -30,11 +30,13 @@ public class Main extends ApplicationAdapter {
 		world = new World(WIDTH, HEIGHT, screen);
 		world.setActiveCamera(new CameraImpl2());
 		try {
-			Model model = new Model(loader.loadModel(SHIP_OBJ_FILE_NAME), new MyVector3(0, 0, 0), "Ship");
+			Model model = new Model(loader.loadModel(HEAD_OBJ_FILE_NAME), new MyVector3(0, 0, 0), "Head");
 			world.addModel(model);
-			model = new Model(loader.loadModel(HEAD_OBJ_FILE_NAME), new MyVector3(5, 0, 0), "Head");
+			model = new Model(loader.loadModel(SHIP_OBJ_FILE_NAME), new MyVector3(5, 0, 0), "Ship");
+			model.setVisible(false);
 			world.addModel(model);
 			model = new Model(loader.loadModel(DIABLO_OBJ_FILE_NAME), new MyVector3(-5, 0, 0), "Diablo");
+			model.setVisible(false);
 			world.addModel(model);
 		} catch (FileNotFoundException e) {
 			throw new IllegalStateException(e);
