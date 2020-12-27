@@ -1,14 +1,19 @@
 package com.negativ.render;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Disposable;
+import com.negativ.render.math.MyColor;
 import com.negativ.render.math.MyVector2;
 import com.negativ.render.math.MyVector3;
 import com.negativ.render.math.MyVector3i;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Screen implements Disposable {
 
@@ -29,11 +34,12 @@ public class Screen implements Disposable {
 
     private double[] zBuffer;
 
+
     public Screen(int width, int height) {
         this.width = width;
         this.height = height;
         this.batch = new SpriteBatch();
-        zBuffer = new double[height * width];
+        zBuffer = new double[width * height];
         pixmap = new Pixmap(width, height, Pixmap.Format.RGB888);
         nextFrame = new Texture(pixmap);
     }
@@ -74,22 +80,20 @@ public class Screen implements Disposable {
             if (zBuffer[zIndex] <= z) {
                 zBuffer[zIndex] = z;
                 pixmap.drawPixel(x, y, color);
-                countDraw++;
-            } else {
-                countSkip++;
             }
         }
     }
 
-    void drawPolygon(MyVector3 t0, MyVector3 t1, MyVector3 t2, MyVector3 vn0, MyVector3 vn1, MyVector3 vn2, MyVector3 light) {
-        MyVector3 n1, n2, front, polygonCentre;
-
+    void drawPolygon(MyVector3 t0, MyVector3 t1, MyVector3 t2,
+                     MyVector3 tex0, MyVector3 tex1, MyVector3 tex2,
+                     MyVector3 light, List<MyVector3> normals, List<Double> reflectFromMap,
+                     List<MyColor> colorsFromMap, int mapHeight, int mapWidth) {
+        MyVector3 n1, n2;
         n1 = t2.sub(t1);
         n2 = t0.sub(t2);
         if (n2.crossProduct(n1).dotProduct(new MyVector3(0, 0, -1)) > 0) {
-            MyVector3i color;
+            MyColor color;
             MyVector3 vn;
-
             double maxX, maxY, minX, minY;
             maxX = Math.max(t0.x, Math.max(t1.x, t2.x));
             maxY = Math.max(t0.y, Math.max(t1.y, t2.y));
@@ -99,13 +103,27 @@ public class Screen implements Disposable {
             A = new MyVector2(t0.x, t0.y);
             B = new MyVector2(t1.x, t1.y);
             C = new MyVector2(t2.x, t2.y);
+            int normalsSize = normals.size();
+            int index;
+            double reflect;
             for (double x = minX; x <= maxX; x++)
                 for (double y = minY; y <= maxY; y++) {
                     MyVector3 barycentric = barycentric(A, B, C, new MyVector2(x, y));
                     if (barycentric.x > -0.06 && barycentric.y > -0.06 && barycentric.z > -0.06) {
-                        double z = barycentric.x * t0.z + barycentric.y * t1.z + barycentric.z * t2.z;
-                        vn = vn0.scale(barycentric.x).add(vn1.scale(barycentric.y)).add(vn2.scale(barycentric.z));
-                        color = getColor(light, vn, new MyVector3(0, 0, -1));
+                        double z = barycentric.x * t0.z + barycentric.z * t1.z + barycentric.y * t2.z;
+                        double texX = (barycentric.x * tex0.x + barycentric.z * tex1.x + barycentric.y * tex2.x) * mapWidth - 1;
+                        double texY = mapHeight - ((barycentric.x * tex0.y + barycentric.z * tex1.y + barycentric.y * tex2.y) * mapHeight) - 1;
+                        index = (int) (texY) + (int) (texX) * mapHeight;
+                        if (index < 0) {
+                            index = 0;
+                        } else if (index > normalsSize) {
+                            index = normalsSize - 1;
+                        }
+                        vn = normals.get(index);
+                        color = colorsFromMap.get(index);
+                        reflect = reflectFromMap.get(index);
+                        color = getColor(color, light, vn, new MyVector3(0, 0, -1), reflect);
+
                         drawPixel((int) (x + 0.5), (int) (y + 0.5), z, color.toRGB888());
                     }
                 }
@@ -113,8 +131,9 @@ public class Screen implements Disposable {
 
     }
 
-    private MyVector3i getColor(MyVector3 light, MyVector3 normal, MyVector3 eye) {
-        MyVector3i result = AMBIENT_COLOR;
+    private MyColor getColor(MyColor color, MyVector3 light, MyVector3 normal, MyVector3 eye, double reflect) {
+
+        MyColor result = color.scale(0.2);
         light = light.nor();
         double dot = normal.nor().dotProduct(light);
         if (dot <= 0) {
@@ -122,9 +141,8 @@ public class Screen implements Disposable {
         }
         double scale = light.dotProduct(normal) * 2;
         MyVector3 lightInvert = light.sub(normal.scale(scale));
-        scale = Math.pow(eye.dotProduct(lightInvert), 8);
-        result = result.add(DEFAULT_COLOR.scale((float) dot)).add(DEFAULT_COLOR.scale((float) scale));
-//        result = result.add(DEFAULT_COLOR.scale((float)dot));
+        scale = Math.pow(eye.dotProduct(lightInvert), 16);
+        result = result.add(color.scale((float) dot).scale(0.7)).add(color.scale(scale * reflect));
 
         return result;
     }

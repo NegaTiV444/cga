@@ -13,6 +13,8 @@ import com.negativ.render.model.Model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class World {
 
@@ -103,67 +105,46 @@ public class World {
             MyMatrix4 worldMatrix = MyMatrix4.getModelTranslationMatrix(model.getPosition(), model.getScale(), model.getRotation());
             MyMatrix4 viewMatrix = activeCamera.getViewMatrix();
             List<MyVector3> vertexes = calculateModelVertexesDouble(model, worldMatrix, viewMatrix);
-            List<MyVector3> normals = new ArrayList<>();
+            List<MyVector3> normalsFromMap = new ArrayList<>();
+            List<MyVector3> tex = model.getMetaInf().getTex();
             MyMatrix4 worldMatrixRotation = worldMatrix.tuncTranslation();
-            MyMatrix4 viewMatrixRotation  = viewMatrix.tuncTranslation();
+            MyMatrix4 viewMatrixRotation = viewMatrix.tuncTranslation();
             MyVector3 light1 = lightVector.mul(viewMatrixRotation);
-            model.getMetaInf().getNormals().forEach(n -> normals.add(n.mul(worldMatrixRotation).mul(viewMatrixRotation).nor()));
+            model.getMetaInf().getNormalsFromMap().forEach(n -> normalsFromMap.add(n.mul(worldMatrixRotation).mul(viewMatrixRotation).nor()));
+
             model.getMetaInf().getPolygons().forEach(p -> {
                 if (p.getVertexesId().size() == 3) {
-                    screen.drawPolygon(
-                            vertexes.get(p.getVertexesId().get(0) - 1),
-                            vertexes.get(p.getVertexesId().get(1) - 1),
-                            vertexes.get(p.getVertexesId().get(2) - 1),
-                            normals.get(p.getNormalId().get(0) - 1),
-                            normals.get(p.getNormalId().get(1) - 1),
-                            normals.get(p.getNormalId().get(2) - 1),
-                            light1
-                    );
+                        screen.drawPolygon(
+                                vertexes.get(p.getVertexesId().get(0) - 1),
+                                vertexes.get(p.getVertexesId().get(1) - 1),
+                                vertexes.get(p.getVertexesId().get(2) - 1),
+                                tex.get(p.getTexId().get(0) - 1),
+                                tex.get(p.getTexId().get(1) - 1),
+                                tex.get(p.getTexId().get(2) - 1),
+                                light1,
+                                normalsFromMap,
+                                model.getMetaInf().getReflectFromMap(),
+                                model.getMetaInf().getColorsFromMap(),
+                                model.getMetaInf().getMapHeight(),
+                                model.getMetaInf().getMapWidth()
+                        );
                 }
+
             });
             vertexes.clear();
         }
     }
 
-    private List<MyVector3i> calculateModelVertexesInt(Model model) {
-        MyMatrix4 worldMatrix = MyMatrix4.getModelTranslationMatrix(model.getPosition(), model.getScale(), model.getRotation());
-        MyMatrix4 viewMatrix = activeCamera.getViewMatrix();
-        MyMatrix4 projectionMatrix;
-        if (projectionMode == 0) {
-            projectionMatrix = MyMatrix4.getRelativeProjectionMatrixUsingFov((float)width/height, FOV, Z_NEAR, Z_FAR);
-        } else {
-            projectionMatrix = MyMatrix4.getOrtoProjection(Z_NEAR, Z_FAR, height, width);
-        }
-        MyMatrix4 viewportMatrix = MyMatrix4.getViewportMatrix(width, height);
-        List<MyVector3i> vertexes = new ArrayList<>((int) (model.getMetaInf().getVertexes().size() * 1.5 + 1));
-
-
-        model.getMetaInf().getVertexes().forEach(v -> vertexes.add(new MyVector3i(v.mul(worldMatrix).mul(viewMatrix).mul(projectionMatrix).mul(viewportMatrix).toVector3())));
-
-//        System.out.println("ViewPort matrix\n" + viewportMatrix + "\n");
-//        System.out.println("Projection matrix\n" + projectionMatrix + "\n");
-//        System.out.println("View matrix\n" + viewMatrix + "\n");
-//        System.out.println("World matrix\n" + worldMatrix + "\n");
-        return vertexes;
-    }
-
     private List<MyVector3> calculateModelVertexesDouble(Model model, MyMatrix4 worldMatrix, MyMatrix4 viewMatrix) {
         MyMatrix4 projectionMatrix;
         if (projectionMode == 0) {
-            projectionMatrix = MyMatrix4.getRelativeProjectionMatrixUsingFov((float)width/height, FOV, Z_NEAR, Z_FAR);
+            projectionMatrix = MyMatrix4.getRelativeProjectionMatrixUsingFov((float) width / height, FOV, Z_NEAR, Z_FAR);
         } else {
             projectionMatrix = MyMatrix4.getOrtoProjection(Z_NEAR, Z_FAR, height, width);
         }
         MyMatrix4 viewportMatrix = MyMatrix4.getViewportMatrix(width, height);
         List<MyVector3> vertexes = new ArrayList<>((int) (model.getMetaInf().getVertexes().size() * 1.5 + 1));
-
-
         model.getMetaInf().getVertexes().forEach(v -> vertexes.add(v.mul(worldMatrix).mul(viewMatrix).mul(projectionMatrix).mul(viewportMatrix).toVector3()));
-
-//        System.out.println("ViewPort matrix\n" + viewportMatrix + "\n");
-//        System.out.println("Projection matrix\n" + projectionMatrix + "\n");
-//        System.out.println("View matrix\n" + viewMatrix + "\n");
-//        System.out.println("World matrix\n" + worldMatrix + "\n");
         return vertexes;
     }
 
